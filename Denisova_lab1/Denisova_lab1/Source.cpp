@@ -1,76 +1,58 @@
 #include <iostream>
 #include <fstream>
-#include <cstdlib>
+#include <limits>
+#include <string>
+
 using namespace std;
 
 struct pipe 
 {
-	int lenght;
-	float diameter;
+	float lenght, diameter;
 	bool inRepair;
 };
 
-void pointLenght(pipe& pipeline) 
+struct compressorStation 
 {
-	cout << "Enter pipe lenght: ";
-	cin >> pipeline.lenght;
-}
+	int allShop, workShop, efficienty;
+	string name;
+};
 
-void pointDiameter(pipe& pipeline) 
+template <typename T>
+T read(T min, T max)
 {
-	cout << "Enter pipe diameter(with point, not comma): ";
-	cin >> pipeline.diameter;
-}
-
-void pointInRepair(pipe& pipeline) 
-{
-	cout << "The pipe is under repair(yes or no): ";
-	cin >> pipeline.inRepair;
+	T input;
+	cin >> input;
+	while (cin.fail() || input<min || input>max)
+	{
+		cout << "Entering value is incorrect, please try again" << endl;
+		cin.clear();
+		cin.ignore(10000, '\n');
+		cin >> input;
+	}
+	return input;
 }
 
 void initializePipe(pipe& pipeline) 
 {
-	pointLenght(pipeline);
-	pointDiameter(pipeline);
-	pointInRepair(pipeline);
+	cout << "Enter pipe lenght: ";
+	pipeline.lenght = read<float>(10.0, 1000.0);
+	cout << "Enter pipe diameter: ";
+	pipeline.diameter = read<float>(1.0, 1000.0);
+	cout << "The pipe is under repair(yes or no): ";
+	pipeline.inRepair = read(0, 1);
 }
 
-struct compressorStation {
-	int allShop, workShop;
-	double efficienty;
-	string name;
-};
-
-void pointAllShop(compressorStation& station)
+void initializeCS(compressorStation& station)
 {
 	cout << "Enter total number of station: ";
-	cin >> station.allShop;
-}
-
-void pointWorkShop(compressorStation& station)
-{
+	station.allShop = read(1, 100);
 	cout << "Enter number of stations in work: ";
-	cin >> station.workShop;
-}
-
-void pointEfficienty(compressorStation& station) 
-{
-	cout << "What is the performance of the station in percent(with point, not comma): ";
-	cin >> station.efficienty;
-}
-
-void pointName(compressorStation& station)
-{
-	cout << "Enter station name: ";
-	cin >> station.name;
-}
-
-void initializeCompressorStation(compressorStation& station)
-{
-	pointAllShop(station);
-	pointWorkShop(station);
-	pointEfficienty(station);
-	pointName(station);
+	station.workShop = read(0, station.allShop);
+	cout << "What is the performance of the station in percent: ";
+	station.efficienty = read(0, 100);
+	cout << "Enter station name: "; //нет ограничений
+	cin >> ws;
+	getline(cin, station.name);
 }
 
 void mainMenu() 
@@ -86,60 +68,54 @@ void mainMenu()
 		<< "0.Exit: " << endl;
 }
 
-void printInfo(pipe& pipeNumberOne, compressorStation& stationNumberOne)
+void infoPipe(pipe& pipe)
 {
-	cout << "Date about pipe number one:" << endl
-		<< "Lenght: " << pipeNumberOne.lenght << endl
-		<< "Diameter: " << pipeNumberOne.diameter << endl
-		<< "In repair: " << pipeNumberOne.inRepair << endl
-		<< endl << "Date about compressor station number one: " << endl
-		<< "All shop: " << stationNumberOne.allShop << endl
-		<< "Work shop: " << stationNumberOne.workShop << endl
-		<< "Efficienty: " << stationNumberOne.efficienty << endl
-		<< "Name station: " << stationNumberOne.name << endl;
+	cout << "Date about pipe:" << endl
+		<< "Lenght: " << pipe.lenght << endl
+		<< "Diameter: " << pipe.diameter << endl
+		<< "In repair: " << pipe.inRepair << endl;
 }
 
-void editPipe(pipe& pipeNumberOne)
+void infoCS(compressorStation& station)
 {
-	cout << "Want to change the status 'InRepair' for this pipe? (Enter '1', if yes and '0', if no)" << endl;
-	bool answer;
-	cin >> answer;
-	if (answer == 1)
-	{
-		pointInRepair(pipeNumberOne);
-	}
+	cout << "Date about compressor station: " << endl
+		<< "All shop: " << station.allShop << endl
+		<< "Work shop: " << station.workShop << endl
+		<< "Efficienty: " << station.efficienty << endl
+		<< "Name station: " << station.name << endl;
 }
 
-void editStation(compressorStation& stationNumberOne)
+void editPipe(pipe& pipe)
 {
-	cout << "Want to change number of workstations? (Enter '1', if yes and '0', if no)" << endl;
-	bool answer;
-	cin >> answer;
-	if (answer == 1)
-	{
-		pointWorkShop(stationNumberOne);
-	}
+	cout << "Enter the new status for pipe: ";
+	cin >> pipe.inRepair;
 }
 
-void save(pipe& pipeNumberOne, compressorStation& stationNumberOne)
+void editStation(compressorStation& station)
+{
+	cout << "Enter the new number of workstations: ";
+	cin >> station.workShop;
+}
+
+void save(pipe& pipe, compressorStation& station)
 {
 	ofstream out; //https://metanit.com/cpp/tutorial/8.3.php
 	out.open("date.txt", ios::out);
-	if (out.is_open())
+	if (out.is_open())	//проверка, открылся ли файл
 	{
-		out << pipeNumberOne.lenght << " " << pipeNumberOne.diameter << " " << pipeNumberOne.inRepair << endl
-			<< stationNumberOne.allShop << " " << stationNumberOne.workShop << " " << stationNumberOne.efficienty << " " << stationNumberOne.name << endl;
+		out << pipe.lenght << " " << pipe.diameter << " " << pipe.inRepair << endl
+			<< station.allShop << " " << station.workShop << " " << station.efficienty << " " << station.name << endl;
 	}
 	out.close();
 }
 
-void loading(pipe& pipeNumberOne, compressorStation& stationNumberOne)
+void loading(pipe& pipe, compressorStation& station)
 {
 	ifstream in;
 	in.open("date.txt", ios::in);
-	if (in.is_open())
+	if (in.is_open())	//проверка, открылся ли файл
 	{
-		in >> pipeNumberOne.lenght >> pipeNumberOne.diameter >> pipeNumberOne.inRepair >> stationNumberOne.allShop >> stationNumberOne.workShop >> stationNumberOne.efficienty >> stationNumberOne.name;
+		in >> pipe.lenght >> pipe.diameter >> pipe.inRepair >> station.allShop >> station.workShop >> station.efficienty >> station.name;
 	}
 	in.close();
 }
@@ -147,40 +123,47 @@ void loading(pipe& pipeNumberOne, compressorStation& stationNumberOne)
 int main() 
 {
 	int numberFromMenu = -1;	
-	pipe pipeNumberOne;
-	compressorStation stationNumberOne;
+	pipe pipe;
+	compressorStation station;
 	while (numberFromMenu)
 	{
 		cout << endl;
 		mainMenu();
-		cin >> numberFromMenu;
-
+		numberFromMenu = read(0,7);
 		switch (numberFromMenu)
 		{
 		case 1:
-			initializePipe(pipeNumberOne);
+			initializePipe(pipe);
 			break;
 		case 2:
-			initializeCompressorStation(stationNumberOne);
+			initializeCS(station);
 			break;
 		case 3:
-			printInfo(pipeNumberOne, stationNumberOne);
+			if (pipe.lenght > 0)
+			{
+				infoPipe(pipe);
+			}
+
+			if (station.allShop > 0) 
+			{
+			cout << endl;
+			infoCS(station);
+			}
 			break;
 		case 4:
-			editPipe(pipeNumberOne);
+			editPipe(pipe);
 			break;
 		case 5:
-			editStation(stationNumberOne);
+			editStation(station);
 			break;
 		case 6:
-			save(pipeNumberOne, stationNumberOne);
+			save(pipe, station);
 			break;
 		case 7:
-			loading(pipeNumberOne, stationNumberOne);
+			loading(pipe, station);
 			break;
-
+		case 0:
+			return 0;
 		}
 	}
-
-	
 }
