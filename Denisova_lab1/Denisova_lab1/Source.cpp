@@ -103,8 +103,11 @@ void save(pipe& pipe, compressorStation& station)
 	out.open("date.txt", ios::out);
 	if (out.is_open())	//проверка, открылся ли файл
 	{
-		out << pipe.lenght << " " << pipe.diameter << " " << pipe.inRepair << endl
-			<< station.allShop << " " << station.workShop << " " << station.efficienty << " " << station.name << endl;
+		out << "Pipe"
+			<< endl << pipe.lenght << " " << pipe.diameter << " " << pipe.inRepair << endl
+			<<"CompressorStation"<<endl
+			<<station.allShop << " " << station.workShop << " " << station.efficienty << " " <<endl
+			<< station.name << endl;
 	}
 	out.close();
 }
@@ -115,7 +118,33 @@ void loading(pipe& pipe, compressorStation& station)
 	in.open("date.txt", ios::in);
 	if (in.is_open())	//проверка, открылся ли файл
 	{
-		in >> pipe.lenght >> pipe.diameter >> pipe.inRepair >> station.allShop >> station.workShop >> station.efficienty >> station.name;
+		string StringCheck = "";
+		int number = -1;
+		cout << "Enter '1', if you want loading" << endl
+			<< "Enter '0', if you don't want to load anything" << endl;
+		number = read(0, 1);
+
+		switch (number) 
+		{
+		case 1:
+			do
+			{
+				getline(in, StringCheck);
+			} while (in.eof() == 0 && StringCheck != "Pipe");
+			in >> pipe.lenght >> pipe.diameter >> pipe.inRepair;
+			do
+			{
+				getline(in, StringCheck);
+			} while (in.eof() == 0 && StringCheck != "CompressorStation");
+			in >> station.allShop >> station.workShop >> station.efficienty;
+			in.ignore(1000, '\n');
+			in.clear();
+			getline(in, station.name);
+			break;
+		case 0:
+			in.close();
+			return;
+		}	
 	}
 	in.close();
 }
@@ -123,8 +152,8 @@ void loading(pipe& pipe, compressorStation& station)
 int main() 
 {
 	int numberFromMenu = -1;	
-	pipe pipe;
-	compressorStation station;
+	pipe pipe = {};
+	compressorStation station = {};
 	while (numberFromMenu)
 	{
 		cout << endl;
@@ -149,12 +178,27 @@ int main()
 			cout << endl;
 			infoCS(station);
 			}
+
+			else {
+				cout << "No data" << endl;
+			}
+
 			break;
 		case 4:
-			editPipe(pipe);
+			if (pipe.lenght > 0) {
+				editPipe(pipe);
+			}
+			else {
+				cout << "No data" << endl;
+			}
 			break;
 		case 5:
-			editStation(station);
+			if (station.allShop > 0) {
+				editStation(station);
+			}
+			else {
+				cout << "No data" << endl;
+			}
 			break;
 		case 6:
 			save(pipe, station);
